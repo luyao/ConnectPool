@@ -8,6 +8,9 @@
 
 #include "connect_pool.h"
 
+#include <libconfig.h++>
+#include <iostream>
+
 #include "class_factory.h"  //for reflection of class
 
 namespace bladecoder_lib{ namespace network{
@@ -75,7 +78,30 @@ ConnectPool::ConnectPool():pImpl_(NULL){}
 //So, it's a compromise between performance and flexibility.
 int ConnectPool::Init(const char *filePath)
 {
-    //TODO: Get the pool from configuration file
+    using namespace libconfig;
+    using namespace std;
+    Config cfg;
+
+    // Read the file. If there is an error, report it and exit.
+    try{
+        cfg.readFile(filePath);
+    }catch(const FileIOException &fioex){
+        std::cerr << "I/O error while reading file." << std::endl;
+        return(EXIT_FAILURE);
+    }catch(const ParseException &pex){
+        std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+            << " - " << pex.getError() << std::endl;
+        return(EXIT_FAILURE);
+    }
+
+    // Get the store name.
+    try {
+        string name = cfg.lookup("name");
+        cout << "Store name: " << name << endl << endl;
+    }catch(const SettingNotFoundException &nfex){
+        cerr << "No 'name' setting in configuration file." << endl;
+    }
+
     pImpl_ = (ConnectPoolImplIf*)ClassFactory::GetClass("SimplePool");
     return pImpl_->Init(filePath);
 }
