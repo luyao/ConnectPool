@@ -1,2 +1,8 @@
 I'll rock you with a perfect connection pool
-This connect pool using automake
+
+The open source used in this software is listed here:
+1. libconfig( http://www.hyperrealm.com/libconfig/ )
+2. automake
+Some of them can be found in the ./deps/
+
+It's recommended to use c++0x, if you can.
