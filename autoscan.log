@@ -1,0 +1,4 @@
+autoscan: warning: missing AC_PROG_CXX wanted by: 
+	src/connect_pool.cpp
+autoscan: warning: missing AC_PROG_MAKE_SET wanted by: 
+	build.sh:46
