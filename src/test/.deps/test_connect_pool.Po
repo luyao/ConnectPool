@@ -1,0 +1,6 @@
+test_connect_pool.o: test_connect_pool.cpp ../include/connect_pool.h \
+ ../include/connect_pool.inl
+
+../include/connect_pool.h:
+
+../include/connect_pool.inl:

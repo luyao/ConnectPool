@@ -27,9 +27,6 @@ PKG_CHECK_MODULES([LIBCONFIGXX], [libconfig++ >= 1.4],,
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([
-                 Makefile
-                 test/Makefile
-                 ])
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT
