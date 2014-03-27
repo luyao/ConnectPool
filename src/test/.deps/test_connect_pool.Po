@@ -1,6 +1,6 @@
-test_connect_pool.o: test_connect_pool.cpp ../include/connect_pool.h \
- ../include/connect_pool.inl
+test_connect_pool.o: test_connect_pool.cpp ../connect_pool/connect_pool.h \
+ ../connect_pool/connect_pool.inl
 
-../include/connect_pool.h:
+../connect_pool/connect_pool.h:
 
-../include/connect_pool.inl:
+../connect_pool/connect_pool.inl:

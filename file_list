@@ -1,5 +1,6 @@
 AUTHORS
-build.sh
+bin
+build.pl
 conf
 configure.ac
 deps

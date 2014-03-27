@@ -6,3 +6,7 @@ The open source used in this software is listed here:
 Some of them can be found in the ./deps/
 
 It's recommended to use c++0x, if you can.
+
+we should use some open-source log library.
+I'll check this 'muduo' tonight;
+

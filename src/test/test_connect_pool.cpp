@@ -12,6 +12,7 @@
 int main()
 {
     bladecoder_lib::network::ConnectPool pool;
+    pool.Init("../../conf/connect_pool.cfg");
     return 0;
 }
 

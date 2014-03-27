@@ -10,8 +10,10 @@
 
 #include <libconfig.h++>
 #include <iostream>
+#include <string>
 
 #include "class_factory.h"  //for reflection of class
+#include "utility.h"
 
 namespace bladecoder_lib{ namespace network{
 
@@ -21,7 +23,6 @@ Handle::Handle(int fd):fd_(fd){}
 
 class Checker{};
 class Dispatcher{};
-
 
 //the declaration of connect pool interface
 DECLEAR_INTERFACE(ConnectPoolImplIf ){
@@ -53,7 +54,7 @@ public:
 
     virtual ~SimplePool(){}
 
-    virtual int Init(const char *filePath){return 0;}
+    virtual int Init(const char *filePath);
 
     virtual Handle GetHandle()const{return Handle(0);}
 
@@ -69,43 +70,44 @@ public:
 };
 
 DEFINE_CLASS(SimplePool);
+int SimplePool::Init(const char *filePath)
+{
+    return 0;
+}
 
 
 ConnectPool::ConnectPool():pImpl_(NULL){}
 
-//thos functions are very simple, but they cant be inlined, because that will bind
-//the implementation to the user.
-//So, it's a compromise between performance and flexibility.
 int ConnectPool::Init(const char *filePath)
 {
     using namespace libconfig;
     using namespace std;
-    Config cfg;
 
-    // Read the file. If there is an error, report it and exit.
-    try{
-        cfg.readFile(filePath);
-    }catch(const FileIOException &fioex){
-        std::cerr << "I/O error while reading file." << std::endl;
-        return(EXIT_FAILURE);
-    }catch(const ParseException &pex){
-        std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
-            << " - " << pex.getError() << std::endl;
-        return(EXIT_FAILURE);
+    Config cfg;
+    int ret = init_config(filePath, cfg);
+    if (ret) {
+        return -1;
     }
 
-    // Get the store name.
+    const Setting &root = cfg.getRoot();
+    std::string name;
+
     try {
-        string name = cfg.lookup("name");
+        const Setting &connect_pool = root["ConnectPool"];
+        connect_pool.lookupValue("PoolType", name);
         cout << "Store name: " << name << endl << endl;
     }catch(const SettingNotFoundException &nfex){
         cerr << "No 'name' setting in configuration file." << endl;
     }
 
-    pImpl_ = (ConnectPoolImplIf*)ClassFactory::GetClass("SimplePool");
+    pImpl_ = (ConnectPoolImplIf*)ClassFactory::GetClass(name);
     return pImpl_->Init(filePath);
 }
 
+
+//thos functions are very simple, but they cant be inlined, because that will bind
+//the implementation to the user.
+//So, it's a compromise between performance and flexibility.
 Handle ConnectPool::GetHandle()const
 {
     return pImpl_->GetHandle();

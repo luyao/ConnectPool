@@ -1,0 +1,2 @@
+noinst_LIBRARIES=libutility.a
+libutility_a_SOURCES=utility.cpp
