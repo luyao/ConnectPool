@@ -82,7 +82,7 @@ public:
     //the configure file should be double-buffered
     //which can be update dynamicly
     //TODO: 1. buffer
-    //      2. configure lib
+    //      2. configure lib DONE
     int Init(const char *filePath);  
 
     /** 
@@ -112,7 +112,7 @@ public:
      * 
      * @Returns    This function should never fail. But still, 0 means success.
      */
-    int SetChecker(const Checker *checker);
+    int SetChecker(const char *checker);
 
     /** 
      * @Synopsis  Maybe we should remove this method. Seems no use
@@ -129,7 +129,7 @@ public:
      * 
      * @Returns    This function should never fail. But still, 0 means success.
      */
-    int SetDispatcher(const Dispatcher *dispatcher);
+    int SetDispatcher(const char *dispatcher);
 
     const Dispatcher* GetDispatcher()const;
 private:

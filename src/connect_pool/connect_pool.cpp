@@ -12,7 +12,8 @@
 #include <iostream>
 #include <string>
 
-#include "class_factory.h"  //for reflection of class
+#include "class_factory.h"     //for reflection of class
+#include "connect_pool_impl.h"
 #include "utility.h"
 
 namespace bladecoder_lib{ namespace network{
@@ -24,84 +25,37 @@ Handle::Handle(int fd):fd_(fd){}
 class Checker{};
 class Dispatcher{};
 
-//the declaration of connect pool interface
-DECLEAR_INTERFACE(ConnectPoolImplIf ){
-public:
-    ConnectPoolImplIf(){}
-
-    virtual ~ConnectPoolImplIf(){}
-
-    virtual int Init(const char *filePath)=0;
-
-    virtual Handle GetHandle()const = 0;
-
-    virtual int FreeHandle(Handle &handle)=0;
-
-    virtual int SetChecker(const Checker *checker)=0;
-
-    virtual const Checker* GetChecker()const=0;
-
-    virtual int SetDispatcher(const Dispatcher *dispatcher)=0;
-
-    virtual const Dispatcher* GetDispatcher()const = 0;
-};
-DEFINE_CLASS(ConnectPoolImplIf);
-
-
-DECLEAR_CLASS_EX(SimplePool, ConnectPoolImplIf){
-public:
-    SimplePool(){}
-
-    virtual ~SimplePool(){}
-
-    virtual int Init(const char *filePath);
-
-    virtual Handle GetHandle()const{return Handle(0);}
-
-    virtual int FreeHandle(Handle &handle){return 0;}
-
-    virtual int SetChecker(const Checker *checker){return 0;}
-
-    virtual const Checker* GetChecker()const{return NULL;}
-
-    virtual int SetDispatcher(const Dispatcher *dispatcher){return 0;}
-
-    virtual const Dispatcher* GetDispatcher()const{return NULL;}
-};
-
-DEFINE_CLASS(SimplePool);
-int SimplePool::Init(const char *filePath)
-{
-    return 0;
-}
-
-
 ConnectPool::ConnectPool():pImpl_(NULL){}
 
 int ConnectPool::Init(const char *filePath)
 {
-    using namespace libconfig;
     using namespace std;
+    using namespace libconfig;
 
     Config cfg;
+
     int ret = init_config(filePath, cfg);
     if (ret) {
         return -1;
     }
 
     const Setting &root = cfg.getRoot();
-    std::string name;
-
+    string name;
     try {
-        const Setting &connect_pool = root["ConnectPool"];
+        cfg.lookupValue("name", name);
+        cout << "Connect Pool name: " << name << endl;
+        const Setting &connect_pool = root[name];
         connect_pool.lookupValue("PoolType", name);
-        cout << "Store name: " << name << endl << endl;
-    }catch(const SettingNotFoundException &nfex){
+        cout << "PoolType: " << name << endl;
+    }catch(const ::libconfig::SettingNotFoundException &nfex){
         cerr << "No 'name' setting in configuration file." << endl;
     }
 
     pImpl_ = (ConnectPoolImplIf*)ClassFactory::GetClass(name);
-    return pImpl_->Init(filePath);
+    if (pImpl_) {
+        return pImpl_->Init(&root);
+    }
+    return -1;
 }
 
 
@@ -119,7 +73,7 @@ int ConnectPool::FreeHandle(Handle &handle)
 }
 
 
-int ConnectPool::SetChecker(const Checker *checker)
+int ConnectPool::SetChecker(const char *checker)
 {
     return pImpl_->SetChecker(checker);
 }
@@ -129,7 +83,7 @@ const Checker* ConnectPool::GetChecker()const
     return pImpl_->GetChecker();
 }
 
-int ConnectPool::SetDispatcher(const Dispatcher *dispatcher)
+int ConnectPool::SetDispatcher(const char *dispatcher)
 {
     return pImpl_->SetDispatcher(dispatcher);
 }

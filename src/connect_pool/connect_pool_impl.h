@@ -15,13 +15,14 @@
 #include "class_factory.h"
 #include "connect_pool.h"
 
-namespace bladecoder_lib{ namespace network{
-
-
 namespace libconfig{
     class Setting;
-}
-    
+};
+ 
+
+namespace bladecoder_lib{ namespace network{
+
+   
 //the declaration of connect pool interface
 DECLEAR_INTERFACE(ConnectPoolImplIf ){
 public:
