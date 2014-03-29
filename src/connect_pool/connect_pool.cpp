@@ -27,6 +27,7 @@ class Dispatcher{};
 
 ConnectPool::ConnectPool():pImpl_(NULL){}
 
+//TODO using log liberary
 int ConnectPool::Init(const char *filePath)
 {
     using namespace std;
@@ -40,12 +41,13 @@ int ConnectPool::Init(const char *filePath)
     }
 
     const Setting &root = cfg.getRoot();
+    const Setting *pPoolConfig = NULL;
     string name;
     try {
         cfg.lookupValue("name", name);
         cout << "Connect Pool name: " << name << endl;
-        const Setting &connect_pool = root[name];
-        connect_pool.lookupValue("PoolType", name);
+        pPoolConfig = &root[name];
+        pPoolConfig->lookupValue("PoolType", name);
         cout << "PoolType: " << name << endl;
     }catch(const ::libconfig::SettingNotFoundException &nfex){
         cerr << "No 'name' setting in configuration file." << endl;
@@ -53,7 +55,7 @@ int ConnectPool::Init(const char *filePath)
 
     pImpl_ = (ConnectPoolImplIf*)ClassFactory::GetClass(name);
     if (pImpl_) {
-        return pImpl_->Init(&root);
+        return pImpl_->Init(pPoolConfig);
     }
     return -1;
 }

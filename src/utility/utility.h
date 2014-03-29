@@ -10,6 +10,7 @@
 #ifndef  __UTILITY_UTILITY_H_
 #define  __UTILITY_UTILITY_H_
 
+
 namespace libconfig{
     class Config;
 }
@@ -27,6 +28,19 @@ namespace libconfig{
 /* ---------------------------------*/
 int init_config(const char *file_path, libconfig::Config &config);
 
+
+namespace bladecoder_lib { namespace network {
+
+inline void assert(bool cond, const char *msg)
+{
+    if ( false == cond ) {
+        fprintf(stderr, "%s\n", msg);
+        *((int*)3) = 0x3;
+    }
+}
+
+
+}}
 
 
 

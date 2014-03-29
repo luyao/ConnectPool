@@ -13,8 +13,11 @@
 #ifndef  __SRC_CONNECT_POOL_SIMPLE_CONNECT_POOL_H_
 #define  __SRC_CONNECT_POOL_SIMPLE_CONNECT_POOL_H_
 
+//#include <memory>               //for shared_ptr
+
 #include "class_factory.h"
 #include "connect_pool_impl.h"  //for inherience
+
 
 namespace bladecoder_lib{ namespace network{
 
@@ -38,8 +41,8 @@ public:
 
     virtual const Dispatcher* GetDispatcher()const{return NULL;}
 protected:
-    Checker    *pChecker_;
-    Dispatcher *pDispatcher_;
+    Checker     *checker_;      //checker for connections, singleton
+    Dispatcher  *dispatcher_;   //dispatcher for connections, singleton
 };
 
 

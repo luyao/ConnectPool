@@ -15,6 +15,15 @@ DEFINE_CLASS(SimpleChecker);
 
 SimpleChecker::SimpleChecker(int duration):duration_(duration){}
 
+SimpleChecker::SimpleChecker():duration_(1){}
+
+int SimpleChecker::Init(const libConfig::Setting *)
+{
+    const libconfig::Setting &setting = (*root)["Checker"];
+    return setting.lookupValue("duration", duration_);
+}
+
+
 /**
  * @brief when reset the cheker, if the checker is running,
  * we should re-running it with new duration

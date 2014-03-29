@@ -10,12 +10,17 @@
 #ifndef  __SRC_CONNECT_POOL_CHECKER_H_
 #define  __SRC_CONNECT_POOL_CHECKER_H_
 
+namespace libconfig{
+    class Setting;
+}
+
 namespace bladecoder_lib{ namespace network{
 
 DECLEAR_INTERFACE(Checker){
 public:
     Checker(){}
 
+    virtual int Init(const libconfig::Setting *);
     virtual ~Checker(){}
 
     virtual void SetDuration(int duration);
@@ -25,9 +30,13 @@ public:
 
 DECLEAR_SINGLETON_CLASS(SimpleChecker){
 public:
+    SimpleChecker();
     SimpleChecker(int duration);
+    virtual int Init(const libconfig::Setting *);
     virtual void SetDuration(int duration);
     virtual void Run();
+private:
+    int duration_;
 };
 
 
