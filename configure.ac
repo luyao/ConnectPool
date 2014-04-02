@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+
 AM_INIT_AUTOMAKE([-Wall]) 
 # 这是在 Autoconf 中使用 Libtool 唯一必须的宏
 AC_PROG_LIBTOOL
@@ -11,7 +12,7 @@ AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-AC_PROG_CXX
+AC_PROG_CXX(${HOME}/bin/g++)
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
