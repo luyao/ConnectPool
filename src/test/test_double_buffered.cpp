@@ -53,15 +53,30 @@ int testLifeTime()
 }
 
 typedef std::unordered_map<size_t, std::string> Dict;
-int load_dict(const void *params, void *data)
+int load_dict(void *data)
 {
-    if (!params || !data) {
+    if (!data) {
         cout<<"Get Wrong params passed in"<<endl;
         return -1;
     }
-    const char *value = static_cast<const char*>(params);
+    const char *value = "123";
     Dict  *p_dict     = static_cast<Dict *>(data);
     for (size_t i = 2; i<=20; i+=2) {
+        p_dict->insert( Dict::value_type(i, value) );
+        cout<<"insert:["<<i<<","<<value<<"]"<<endl;
+    }
+    return 0;
+}
+
+int load_dict2(void *data)
+{
+    if (!data) {
+        cout<<"Get Wrong params passed in"<<endl;
+        return -1;
+    }
+    const char *value = "456";
+    Dict  *p_dict     = static_cast<Dict *>(data);
+    for (size_t i = 1; i<=20; i+=2) {
         p_dict->insert( Dict::value_type(i, value) );
         cout<<"insert:["<<i<<","<<value<<"]"<<endl;
     }
@@ -73,17 +88,38 @@ int main()
     //testScope();
     //testLifeTime();
 
-    Buffer<Dict> dictBuffer(load_dict, "123");
-    shared_ptr<Dict> dict = dictBuffer.content();
-    if (!dict) {
-        cout<<"Get error shared_ptr"<<endl;
-        return -1;
-    }
-
-    for (auto i=dict->begin(); i != dict->end(); ++i) {
-        cout<<i->first<<" "<<i->second<<endl;
-    }
-
+    //Buffer<Dict> dictBuffer(load_dict);
+    Buffer<Dict> dictBuffer2(load_dict2);
+    const BufferMgr &mgr = BufferMgr::instance();
+    //mgr.regiesterTimerEvent(dictBuffer, 1);
+    mgr.regiesterFileEvent(dictBuffer2, "./abc");
+//
+//    {
+//        shared_ptr<Dict> dict = dictBuffer.content();
+//        if (!dict) {
+//            cout<<"Get error shared_ptr"<<endl;
+//            return -1;
+//        }
+//
+//        for (auto i=dict->begin(); i != dict->end(); ++i) {
+//            cout<<i->first<<" "<<i->second<<endl;
+//        }
+//    }
+//
+//    dictBuffer.update();
+//    {
+//        shared_ptr<Dict> dict = dictBuffer.content();
+//        if (!dict) {
+//            cout<<"Get error shared_ptr"<<endl;
+//            return -1;
+//        }
+//
+//        for (auto i=dict->begin(); i != dict->end(); ++i) {
+//            cout<<i->first<<" "<<i->second<<endl;
+//        }
+//    }
+//
+    std::this_thread::sleep_for(std::chrono::seconds(1000));
     return 0;
 }
 

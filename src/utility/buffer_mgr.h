@@ -10,12 +10,18 @@
 #ifndef  _____UTILITY_BUFFER_MGR_H_
 #define  _____UTILITY_BUFFER_MGR_H_
 
+#include <chrono>         //for chrono
 #include <memory>         //for shared_ptr, only works in c++0x
 #include <functional>     //for function template class
 #include <queue>          //for priority queue
 #include <mutex>          //for mutex and lock_guard
+#include <thread>         //for thread
+#include <sys/stat.h>
+#include <iostream>
 
-typedef std::function< int(const void *param, void *data) > CreateFn;
+#include "utility.h"
+
+typedef std::function< int(void *data) > CreateFn;
 
 //strongly NOT recommand using shared_ptr::get() to SAVE the raw
 //pointer.
@@ -25,20 +31,17 @@ public:
     typedef T                         value_type;
     typedef std::shared_ptr< T >      value_ptr;
 
-    explicit Buffer(const CreateFn &fn):index_(0), creater_(fn){}
-
-    //deprecated, I recommand u use update(), if you use it,
     //You need to check whether the pointer is valid
-    Buffer(const CreateFn &fn, const void *params)throw()
+    explicit Buffer(const CreateFn &fn)throw()
         :index_(0),creater_(fn)
     {
-        update(params);
+        update();
     }
 
     const value_ptr& content()const{return buffer_[getIndex()];}
           value_ptr& content()     {return buffer_[getIndex()];}
 
-    int update(const void *params);
+    int update();
 
     const CreateFn*  getCreater() const{return &creater_;}
     void setCreater(const CreateFn &fn){creater_ = fn;}
@@ -54,7 +57,7 @@ private:
 };
 
 template<typename T>
-int Buffer<T>::update(const void *params)
+int Buffer<T>::update()
 {
     value_ptr &current = buffer_[getNextIndex()];
     //0 means not init yet, 1 means hold by itself
@@ -70,7 +73,7 @@ int Buffer<T>::update(const void *params)
     //counter is 1, when the life-time of current is over, the data will be freed
     buffer_[getNextIndex()] = value_ptr( new (std::nothrow) value_type() );
     if (!buffer_[getNextIndex()] ||
-        creater_(params, buffer_[getNextIndex()].get()) ) {
+        creater_(buffer_[getNextIndex()].get()) ) {
         return -1;  //when loading failed, we donot update the index
     }
 
@@ -78,73 +81,54 @@ int Buffer<T>::update(const void *params)
     return 0;
 }
 
+const bool LOVE = true;
 
 class BufferMgr{
 public:
-    static BufferMgr& instance()
+    static const BufferMgr& instance()
     {
         static BufferMgr _mgr;
         return _mgr;
     }
 
     template<typename T>
-    int regiesterTimerEvent(const Buffer<T> &buf, int time_out)
+    int regiesterTimerEvent(Buffer<T> &buf, int time_out)const
     {
-        std::lock_guard<std::mutex> lock(lock_);
-        queue_.emplace(buf.getCreater(), time_out);
+        std::thread _thread(
+            [&, time_out]{  //the timeout can not be reference
+                while( LOVE ) {
+                    std::this_thread::sleep_for(std::chrono::seconds(time_out));
+                    buf.update();
+                }
+            }
+        );
+        _thread.detach();
         return 0;
     }
 
     template<typename T>
-    int regiesterFileEvent(const Buffer<T> &buf, const char *file_name,
-                           int time_out = DEFAULT_FILE_CHECK_INTERVAL)
+    int regiesterFileEvent(Buffer<T> &buf, const std::string &file_name,
+                           int time_out = DEFAULT_FILE_CHECK_INTERVAL)const
     {
-        std::lock_guard<std::mutex> lock(lock_);
-        queue_.emplace(buf.getCreater(), file_name, time_out);
+        std::thread _thread(
+            [&, file_name, time_out]{
+                int now = 0;
+                while( LOVE ) {
+                    std::this_thread::sleep_for(std::chrono::seconds(time_out));
+                    struct stat fileStat;
+                    if (stat(file_name.c_str(), &fileStat))continue;
+                    if (now < fileStat.st_mtime)buf.update();
+                    now = fileStat.st_mtime; 
+                }
+            }
+        );
+        _thread.detach();
         return 0; 
     }
 
-    void run()const
-    {
-        //we calculate the the lowest common denominator first
-    }
-
 private:
-    static const int DEFAULT_FILE_CHECK_INTERVAL = 10;  //second
-    enum{
-        STOPPED,
-        RUNNING
-    };
-private:
-    BufferMgr():status_(STOPPED){}
-    //the buffer unit is sorted by the timeout value
-    struct _BufferMgrUnit{
-        //create the timer
-        _BufferMgrUnit(const CreateFn *fn, int time_out):
-            creater_(fn), file_name_(NULL), time_out_(time_out){}
-
-        //create the file monitor which using setted check time
-        _BufferMgrUnit(const CreateFn *fn, const char *file_name,int time_out):
-            creater_(fn), file_name_(file_name_), time_out_(time_out){}
-
-        const CreateFn *creater_;
-        const char     *file_name_;
-        int            time_out_;
-
-        bool operator>(const _BufferMgrUnit &rhs)const
-        {
-            return this->time_out_ > rhs.time_out_;
-        }
-    };
-private:
-    std::priority_queue<_BufferMgrUnit,
-                        std::vector<_BufferMgrUnit>,
-                        std::greater<_BufferMgrUnit> > queue_;
-    mutable std::mutex lock_;
-    mutable int        status_;  //true means running
+    static const int DEFAULT_FILE_CHECK_INTERVAL = 1;  //second
 };
-
-
 
 
 #endif  //_____UTILITY_BUFFER_MGR_H_

@@ -29,7 +29,7 @@ namespace libconfig{
 int init_config(const char *file_path, libconfig::Config &config);
 
 
-namespace bladecoder_lib { namespace network {
+namespace bladecoder_lib { namespace utility{
 
 inline void assert(bool cond, const char *msg)
 {
@@ -37,6 +37,20 @@ inline void assert(bool cond, const char *msg)
         fprintf(stderr, "%s\n", msg);
         *((int*)3) = 0x3;
     }
+}
+
+int gcd(int a,int b){
+    if( a < b ){  /*交换两个数，使大数放在a上*/
+        return gcd(b, a);
+    }else if (a > b) {
+        int temp;
+        while(b!=0){  /*利用辗除法，直到b为0为止*/
+            temp = a%b;
+            a=b;
+            b=temp;
+        }
+    }
+    return a;  //equal or bigger
 }
 
 

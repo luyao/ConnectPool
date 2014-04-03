@@ -22,7 +22,7 @@ namespace bladecoder_lib { namespace network {
 DEFINE_CLASS(SimplePool);
 int SimplePool::Init(const libconfig::Setting *root)
 {
-    assert(root, "root node is null");
+    ::bladecoder_lib::utility::assert(root, "root node is null");
     using namespace libconfig;
     using std::cerr;
     using std::endl;
