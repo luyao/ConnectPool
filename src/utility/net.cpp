@@ -103,14 +103,17 @@ int net_connect(const char *ip, uint32_t port, int timeout)
             goto connect_fail;
         }
     }
-
+    //cancle the timeout option
+    timeout.tv_usec = 0;
+    if (setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+        fprintf(stderr, "(setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) ERR(%m)", errno);
+    }
     // 设置tcp发送无延迟
     if (setsockopt(fd, IPPROTO_TCP,TCP_NODELAY, &on, sizeof(on)) < 0) {
         fprintf(stderr, "(setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on)) ERR(%m)",errno);
     }
 connect_ok:
     return 0;
-
 connect_fail_free_res:
     freeaddrinfo(res);
 connect_fail:

@@ -29,6 +29,10 @@ Handle::Handle(int serv_id):fd_(0), serv_id_(serv_id){}
 Handle::Handle(const std::string &ip, uint32_t port, int serv_id):
     fd_(0), serv_id_(serv_id), ip_(ip), port_(port){}
 
+{
+    
+}
+
 Handle::~Handle()
 {
     //using namespace bladecoder_lib::network;
@@ -37,11 +41,12 @@ Handle::~Handle()
 
 int Handle::connect(const std::string &ip, uint32_t port)
 {
-    return 0;
+    int ret = net_connect(ip.c_str(), port);
 }
 
 bool Handle::ping()
 {
+    if (status_ != CONNECTED) return false;
     return net_ping(fd_, ip_.c_str(), port_);
 }
 

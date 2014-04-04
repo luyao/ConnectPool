@@ -64,9 +64,10 @@ int SimplePool::Init(const libconfig::Setting *root)
         int count = servers.getLength();
         for (int i=0; i<count; ++i) {
             std::string ip;
-            uint32_t port, weight;
-            if(!(servers.lookupValue("ip", ip)     && 
-                 servers.lookupValue("port", port) &&
+            uint32_t port, weight, timeout;
+            if(!(servers.lookupValue("ip", ip)           && 
+                 servers.lookupValue("port", port)       &&
+                 servers.lookupValue("timeout", timeout) &&
                  servers.lookupValue("weight", weight) ) ){
                 continue;
             }
@@ -75,6 +76,8 @@ int SimplePool::Init(const libconfig::Setting *root)
     }catch(const SettingNotFoundException &nfex){
         cerr << "No 'Servers' setting in configuration file." << endl;
     }
+
+    //now we set the connection into the server
 
     return 0;
 }

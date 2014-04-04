@@ -9,6 +9,7 @@
 #ifndef  __SRC_CONNECT_POOL_SIMPLE_CONNECT_POOL_H_
 #define  __SRC_CONNECT_POOL_SIMPLE_CONNECT_POOL_H_
 
+#include <list>
 #include <vector>               //for vecotr
 #include <unordered_map>
 
@@ -39,7 +40,15 @@ public:
 
     virtual const Dispatcher* GetDispatcher()const{return NULL;}
 protected:
-    typedef std::unordered_multimap<int, Handle> ConnectionDict;
+    typedef std::queue<Handle> ConnectionQueue;
+
+    struct ConnectionUnit{
+        ConnectionQueue in_use_;
+        ConnectionQueue pool_;
+    };
+
+    typedef std::unordered_map<Handle, ConnectionUnit> ConnectionDict;
+
     Checker              *checker_;      //checker for connections, singleton
     Dispatcher           *dispatcher_;   //dispatcher for connections, singleton
     std::vector<Server>  servers_;

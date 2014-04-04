@@ -63,9 +63,18 @@ class Dispatcher;
 //every handle is belong to a server
 class Handle{
 public:
+    enum {
+        UN_INITIALIZED, //un-initialized
+        CONNECTED,
+        IN_USING,
+        UNCONNECTED,    //temprory un-connected
+        BROKEN          //means the server is doomed
+    };
+
     Handle();
     explicit Handle( int serv_id );
     Handle(const std::string &ip, uint32_t port, int serv_id);
+    Handle(Handle &&);  //to support the movement
 
     ~Handle();
 
@@ -88,8 +97,8 @@ public:
 private:
     int             fd_;       //the linux file descripter
     int             serv_id_;  //-1 means invalid
-    std::string     ip_;
-    uint32_t        port_;
+    int             status_;
+    int             timeout_;
 };
 
 //the connect pool cant be copied, but can be multi
