@@ -34,6 +34,8 @@
 #ifndef  __INCLUDE_CONNECT_POOL_H_
 #define  __INCLUDE_CONNECT_POOL_H_
 
+#include <string>
+
 namespace bladecoder_lib{ namespace network{
 
 class Uncopyable 
@@ -58,10 +60,22 @@ class Checker;
 class Dispatcher;
 
 //Wrapping the description, which provide better portability
+//every handle is belong to a server
 class Handle{
 public:
     Handle();
-    explicit Handle(int fd);
+    explicit Handle( int serv_id );
+    Handle(const std::string &ip, uint32_t port, int serv_id);
+
+    ~Handle();
+
+    void setServId(int serv_id)  {serv_id_ = serv_id;}
+    int  getServId()             {return serv_id_;}
+
+    int connect(const std::string &ip, uint32_t port);
+
+    int close();
+
     int operator()();
 
     //implicit conversion
@@ -69,8 +83,13 @@ public:
 
     //can be use to check if the Handle is good to use
     operator bool();
+
+    bool ping();
 private:
-    int fd_;
+    int             fd_;       //the linux file descripter
+    int             serv_id_;  //-1 means invalid
+    std::string     ip_;
+    uint32_t        port_;
 };
 
 //the connect pool cant be copied, but can be multi

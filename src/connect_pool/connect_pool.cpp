@@ -11,16 +11,39 @@
 #include <libconfig.h++>
 #include <iostream>
 #include <string>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include "class_factory.h"     //for reflection of class
 #include "connect_pool_impl.h"
 #include "utility.h"
+#include "net.h"
 
 namespace bladecoder_lib{ namespace network{
 
-Handle::Handle():fd_(0){}
+Handle::Handle():fd_(0), serv_id_(-1){}
 
-Handle::Handle(int fd):fd_(fd){}
+Handle::Handle(int serv_id):fd_(0), serv_id_(serv_id){}
+
+Handle::Handle(const std::string &ip, uint32_t port, int serv_id):
+    fd_(0), serv_id_(serv_id), ip_(ip), port_(port){}
+
+Handle::~Handle()
+{
+    //using namespace bladecoder_lib::network;
+    net_close(fd_);
+}
+
+int Handle::connect(const std::string &ip, uint32_t port)
+{
+    return 0;
+}
+
+bool Handle::ping()
+{
+    return net_ping(fd_, ip_.c_str(), port_);
+}
 
 class Checker{};
 class Dispatcher{};
@@ -61,7 +84,7 @@ int ConnectPool::Init(const char *filePath)
 }
 
 
-//thos functions are very simple, but they cant be inlined, because that will bind
+//those functions are very simple, but they cant be inlined, because that will bind
 //the implementation to the user.
 //So, it's a compromise between performance and flexibility.
 Handle ConnectPool::GetHandle()const

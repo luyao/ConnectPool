@@ -6,16 +6,15 @@
  * @brief 
  **/
 
-
-
-
-
 #ifndef  __SRC_CONNECT_POOL_SIMPLE_CONNECT_POOL_H_
 #define  __SRC_CONNECT_POOL_SIMPLE_CONNECT_POOL_H_
 
+#include <vector>               //for vecotr
+#include <unordered_map>
 
 #include "class_factory.h"
 #include "connect_pool_impl.h"  //for inherience
+#include "server.h"
 
 
 namespace bladecoder_lib{ namespace network{
@@ -40,8 +39,11 @@ public:
 
     virtual const Dispatcher* GetDispatcher()const{return NULL;}
 protected:
-    Checker     *checker_;      //checker for connections, singleton
-    Dispatcher  *dispatcher_;   //dispatcher for connections, singleton
+    typedef std::unordered_multimap<int, Handle> ConnectionDict;
+    Checker              *checker_;      //checker for connections, singleton
+    Dispatcher           *dispatcher_;   //dispatcher for connections, singleton
+    std::vector<Server>  servers_;
+    ConnectionDict       connections_;
 };
 
 

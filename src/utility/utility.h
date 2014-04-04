@@ -35,7 +35,7 @@ inline void assert(bool cond, const char *msg)
 {
     if ( false == cond ) {
         fprintf(stderr, "%s\n", msg);
-        *((int*)3) = 0x3;
+        *((int*)3) = 0x3; //make core dump
     }
 }
 

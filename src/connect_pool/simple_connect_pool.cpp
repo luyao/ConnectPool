@@ -57,6 +57,25 @@ int SimplePool::Init(const libconfig::Setting *root)
     //}catch(const SettingNotFoundException &nfex){
     //    cerr << "No 'Checker' setting in configuration file." << endl;
     //}   
+
+    //init servers
+    try{
+        const libconfig::Setting &servers = (*root)["Servers"];
+        int count = servers.getLength();
+        for (int i=0; i<count; ++i) {
+            std::string ip;
+            uint32_t port, weight;
+            if(!(servers.lookupValue("ip", ip)     && 
+                 servers.lookupValue("port", port) &&
+                 servers.lookupValue("weight", weight) ) ){
+                continue;
+            }
+            servers_.emplace_back(Server(ip, port, weight));
+        }
+    }catch(const SettingNotFoundException &nfex){
+        cerr << "No 'Servers' setting in configuration file." << endl;
+    }
+
     return 0;
 }
 

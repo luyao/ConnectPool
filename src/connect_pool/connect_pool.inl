@@ -1,8 +1,9 @@
 #ifndef  __INCLUDE_CONNECT_POOL_H_
 #define  __INCLUDE_CONNECT_POOL_H_
 
-namespace bladecoder_lib{ namespace network{
+#include <unistd.h>
 
+namespace bladecoder_lib{ namespace network{
 
 inline int Handle::operator()()
 {
@@ -17,6 +18,12 @@ inline operator bool()
 inline operator int()
 {
     return fd_;
+}
+
+inline int Handle::close()
+{
+    close(fd_);
+    fd_ = 0;
 }
 
 
