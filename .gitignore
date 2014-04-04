@@ -1,0 +1,11 @@
+deps/*/
+
+*.[oa]
+
+*.Po
+
+*.Plo
+
+Makefile
+
+*.in
